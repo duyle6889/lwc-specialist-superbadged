@@ -1,0 +1,10 @@
+<template>
+    <lightning-layout>
+        <lightning-layout-item class="slds-align-middle">
+            <!-- filter via boat type here -->
+            <lightning-combobox name="boat-type" placeholder="select boat type" value={selectedBoatTypeId}
+                options={searchOptions} onchange={handleSearchOptionChange} class="slds-align-middle">
+            </lightning-combobox>
+        </lightning-layout-item>
+    </lightning-layout>
+</template>
