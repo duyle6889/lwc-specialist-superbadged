@@ -6,7 +6,7 @@ public with sharing class BoatDataService {
       if (String.isBlank(boatTypeId)) {
         return [
           SELECT
-            ID,
+            Id,
             Name,
             Boat_Image__c,
             CreatedById,
@@ -23,7 +23,7 @@ public with sharing class BoatDataService {
       } else {
         return [
           SELECT
-            ID,
+            Id,
             Name,
             Boat_Image__c,
             CreatedById,
@@ -50,7 +50,7 @@ public with sharing class BoatDataService {
     try {
       return [
         SELECT
-          ID,
+          Id,
           Name,
           Boat_Image__c,
           CreatedById,
@@ -75,7 +75,7 @@ public with sharing class BoatDataService {
   public static List<BoatType__c> getBoatTypes() {
     try {
       return [
-        SELECT ID, Name
+        SELECT Id, Name
         FROM BoatType__c
         WITH SECURITY_ENFORCED
         ORDER BY Name
@@ -90,7 +90,7 @@ public with sharing class BoatDataService {
   public static List<BoatReview__c> getAllReviews(Id boatId) {
     try {
       return [
-        SELECT ID, Name, Comment__c, CreatedById, LastModifiedById, Rating__c
+        SELECT Id, Name, Comment__c, CreatedById, LastModifiedById, Rating__c
         FROM BoatReview__c
         WHERE Boat__c = :boatId
         WITH SECURITY_ENFORCED
@@ -109,7 +109,7 @@ public with sharing class BoatDataService {
   ) {
     try {
       String query =
-        'SELECT ID, Name, Geolocation__Latitude__s, Geolocation__Longitude__s FROM Boat__c' +
+        'SELECT Id, Name, Geolocation__Latitude__s, Geolocation__Longitude__s FROM Boat__c' +
         'WHERE DISTANCE(Geolocation__c, GEOLOCATION(:latitude, :longitude), \'km\') < 20';
 
       if (String.isBlank(boatTypeId)) {
