@@ -55,24 +55,103 @@ public with sharing class BoatDataService {
   @AuraEnabled(cacheable=true)
   public static List<Boat__c> getSimilarBoats(Id boatId, String similarBy) {
     try {
-      return [
+      // get current boat info
+      List<Boat__c> curBoat = [
         SELECT
           Id,
           Name,
-          Boat_Image__c,
-          CreatedById,
-          Description__c,
-          Geolocation__Latitude__s,
-          Geolocation__Longitude__s,
+          BoatType__c,
+          BoatType__r.Name,
           Length__c,
-          Picture__c,
           Price__c,
           Year_Built__c
         FROM Boat__c
-        WHERE Id = :boatId AND BoatType__c = :similarBy
+        WHERE Id = :boatId
         WITH SECURITY_ENFORCED
         ORDER BY Name
       ];
+      if (curBoat.isEmpty()) {
+        return null;
+      }
+
+      // get similar boats with current boat
+      String curBoatType = curBoat[0].BoatType__r.Name;
+      Double curBoatLength = curBoat[0].Length__c;
+      Double curBoatPrice = curBoat[0].Price__c;
+
+      List<Boat__c> similarBoats = new List<Boat__c>();
+      switch on similarBy {
+        // filter by current boat Price
+        when 'Price' {
+          similarBoats = [
+            SELECT
+              Id,
+              Name,
+              Boat_Image__c,
+              BoatType__c,
+              Description__c,
+              Geolocation__Latitude__s,
+              Geolocation__Longitude__s,
+              Length__c,
+              Picture__c,
+              Price__c,
+              Year_Built__c,
+              Contact__r.Name,
+              BoatType__r.Name
+            FROM Boat__c
+            WHERE Price__c = :curBoatPrice
+            WITH SECURITY_ENFORCED
+            ORDER BY Name
+          ];
+        }
+        // filter by current boat Length
+        when 'Length' {
+          similarBoats = [
+            SELECT
+              Id,
+              Name,
+              Boat_Image__c,
+              BoatType__c,
+              Description__c,
+              Geolocation__Latitude__s,
+              Geolocation__Longitude__s,
+              Length__c,
+              Picture__c,
+              Price__c,
+              Year_Built__c,
+              Contact__r.Name,
+              BoatType__r.Name
+            FROM Boat__c
+            WHERE Length__c = :curBoatLength
+            WITH SECURITY_ENFORCED
+            ORDER BY Name
+          ];
+        }
+        // filter by current boat Type by default
+        when else {
+          similarBoats = [
+            SELECT
+              Id,
+              Name,
+              Boat_Image__c,
+              BoatType__c,
+              Description__c,
+              Geolocation__Latitude__s,
+              Geolocation__Longitude__s,
+              Length__c,
+              Picture__c,
+              Price__c,
+              Year_Built__c,
+              Contact__r.Name,
+              BoatType__r.Name
+            FROM Boat__c
+            WHERE BoatType__r.Name = :curBoatType
+            WITH SECURITY_ENFORCED
+            ORDER BY Name
+          ];
+        }
+      }
+      return similarBoats;
     } catch (Exception e) {
       throw new AuraHandledException(e.getMessage());
     }
