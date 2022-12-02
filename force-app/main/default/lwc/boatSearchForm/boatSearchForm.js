@@ -11,8 +11,7 @@ export default class BoatSearchForm extends LightningElement {
     boatTypes({ error, data }) {
         if (data) {
             this.searchOptions = data.map(type => {
-                console.log("---boat type: " + JSON.stringify(type));
-                return { label: '$type.Name', value: '$type.Id' };
+                return { label: type.Name, value: type.Id };
             });
             // add first option to list boat type
             this.searchOptions.unshift({ label: 'All Types', value: '' });

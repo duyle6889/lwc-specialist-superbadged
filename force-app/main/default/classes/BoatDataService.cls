@@ -2,6 +2,7 @@ public with sharing class BoatDataService {
   // get boat items via boat type
   @AuraEnabled(cacheable=true)
   public static List<Boat__c> getBoats(String boatTypeId) {
+    System.debug('getBoats boatTypeId: ' + boatTypeId);
     try {
       if (String.isBlank(boatTypeId)) {
         return [
@@ -9,13 +10,16 @@ public with sharing class BoatDataService {
             Id,
             Name,
             Boat_Image__c,
-            CreatedById,
+            BoatType__c,
             Description__c,
-            Geolocation__c,
+            Geolocation__Latitude__s,
+            Geolocation__Longitude__s,
             Length__c,
             Picture__c,
             Price__c,
-            Year_Built__c
+            Year_Built__c,
+            Contact__r.Name,
+            BoatType__r.Name
           FROM Boat__c
           WITH SECURITY_ENFORCED
           ORDER BY Name
@@ -26,13 +30,16 @@ public with sharing class BoatDataService {
             Id,
             Name,
             Boat_Image__c,
-            CreatedById,
+            BoatType__c,
             Description__c,
-            Geolocation__c,
+            Geolocation__Latitude__s,
+            Geolocation__Longitude__s,
             Length__c,
             Picture__c,
             Price__c,
-            Year_Built__c
+            Year_Built__c,
+            Contact__r.Name,
+            BoatType__r.Name
           FROM Boat__c
           WHERE BoatType__c = :boatTypeId
           WITH SECURITY_ENFORCED
@@ -55,7 +62,8 @@ public with sharing class BoatDataService {
           Boat_Image__c,
           CreatedById,
           Description__c,
-          Geolocation__c,
+          Geolocation__Latitude__s,
+          Geolocation__Longitude__s,
           Length__c,
           Picture__c,
           Price__c,
@@ -73,6 +81,7 @@ public with sharing class BoatDataService {
   // get type of boat
   @AuraEnabled(cacheable=true)
   public static List<BoatType__c> getBoatTypes() {
+    System.debug('getBoatTypes ');
     try {
       return [
         SELECT Id, Name
@@ -90,7 +99,16 @@ public with sharing class BoatDataService {
   public static List<BoatReview__c> getAllReviews(Id boatId) {
     try {
       return [
-        SELECT Id, Name, Comment__c, CreatedById, LastModifiedById, Rating__c
+        SELECT
+          Id,
+          Name,
+          Comment__c,
+          Rating__c,
+          LastModifiedDate,
+          CreatedDate,
+          CreatedBy.Name,
+          CreatedBy.SmallPhotoUrl,
+          CreatedBy.CompanyName
         FROM BoatReview__c
         WHERE Boat__c = :boatId
         WITH SECURITY_ENFORCED
@@ -102,25 +120,41 @@ public with sharing class BoatDataService {
   }
 
   @AuraEnabled(cacheable=true)
-  public static List<Boat__c> getBoatsByLocation(
+  public static String getBoatsByLocation(
     Decimal latitude,
     Decimal longitude,
     String boatTypeId
   ) {
+    System.debug('getBoatsByLocation');
+    List<Boat__c> boats = new List<Boat__c>();
     try {
-      String query =
-        'SELECT Id, Name, Geolocation__Latitude__s, Geolocation__Longitude__s FROM Boat__c' +
-        'WHERE DISTANCE(Geolocation__c, GEOLOCATION(:latitude, :longitude), \'km\') < 20';
-
-      if (String.isBlank(boatTypeId)) {
-        query += ' AND BoatType__c = ' + String.escapeSingleQuotes(boatTypeId);
+      if (Boat__c.sObjectType.getDescribe().isQueryable()) {
+        if (String.isNotBlank(boatTypeId)) {
+          boats = [
+            SELECT Id, Name, Geolocation__Latitude__s, Geolocation__Longitude__s
+            FROM Boat__c
+            WHERE BoatType__c = :boatTypeId
+            WITH SECURITY_ENFORCED
+            ORDER BY
+              DISTANCE(Geolocation__c, GEOLOCATION(:latitude, :longitude), 'mi')
+            LIMIT 10
+          ];
+        } else {
+          boats = [
+            SELECT Id, Name, Geolocation__Latitude__s, Geolocation__Longitude__s
+            FROM Boat__c
+            WITH SECURITY_ENFORCED
+            ORDER BY
+              DISTANCE(Geolocation__c, GEOLOCATION(:latitude, :longitude), 'mi')
+            LIMIT 10
+          ];
+        }
       }
-
-      query += 'WITH SECURITY_ENFORCED ORDER BY DISTANCE(Geolocation__c, GEOLOCATION(:latitude, :longitude), \'km\') LIMIT 10';
-      return Database.query(String.escapeSingleQuotes(query));
     } catch (Exception e) {
       throw new AuraHandledException(e.getMessage());
     }
+
+    return JSON.serialize(boats);
   }
 
   @AuraEnabled

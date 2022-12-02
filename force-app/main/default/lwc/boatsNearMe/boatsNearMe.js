@@ -25,7 +25,7 @@ export default class BoatsNearMe extends LightningElement {
     })
     wiredBoatsJSON({ error, data }) {
         if (data) {
-            this.createMapMarkers(data.values);
+            this.createMapMarkers(data);
         } else if (error) {
             this.handleError(error);
         }
@@ -35,7 +35,7 @@ export default class BoatsNearMe extends LightningElement {
     handleError(error) {
         const evt = new ShowToastEvent({
             title: ERROR_TITLE,
-            message: "Error Message: " + error,
+            message: "Error Message: " + error.message,
             variant: ERROR_VARIANT
         });
         this.dispatchEvent(evt);
@@ -55,6 +55,7 @@ export default class BoatsNearMe extends LightningElement {
     getLocationFromBrowser() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(position => {
+                console.log('getLocationFromBrowser get geolocation: ' + position.coords.latitude + ' - ' + position.coords.longitude);
                 this.latitude = position.coords.latitude;
                 this.longitude = position.coords.longitude;
             });
@@ -63,7 +64,7 @@ export default class BoatsNearMe extends LightningElement {
 
     // Creates the map markers
     createMapMarkers(boatData) {
-        const newMarkers = boatData.map(boat => {
+        const newMarkers = JSON.parse(boatData).map(boat => {
             return {
                 location: {
                     Latitude: boat.Geolocation__Latitude__s,
