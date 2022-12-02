@@ -43,6 +43,7 @@ export default class BoatSearchResults extends LightningElement {
     ];
     boatTypeId = '';
     boats;
+    wiredResults;
     isLoading = false;
     draftValues = [];
 
@@ -54,6 +55,7 @@ export default class BoatSearchResults extends LightningElement {
     @wire(getBoats, {boatTypeId: '$boatTypeId'})
     wiredBoats(result) {
         if (result.data) {
+            this.wiredResults = result;
             this.boats = result.data;
         } else if (result.error) {
             console.error("error message: " + result.error);
@@ -75,7 +77,7 @@ export default class BoatSearchResults extends LightningElement {
     async refresh() {
         this.isLoading = true;
         this.notifyLoading(this.isLoading);
-        await refreshApex(this.boats);
+        await refreshApex(this.wiredResults);
         this.isLoading = false;
         this.notifyLoading(this.isLoading);
     }
