@@ -75,7 +75,6 @@ export default class BoatMap extends LightningElement {
             BOATMC,
             (message) => {
                 this.boatId = message.recordId;
-                console.log('asdasdasd');
             },
             { scope: APPLICATION_SCOPE }
         );
