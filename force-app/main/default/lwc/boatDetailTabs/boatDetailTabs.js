@@ -70,16 +70,21 @@ export default class BoatDetailTabs extends NavigationMixin(LightningElement) {
     // local boatId must receive the recordId from the message
     // recordId is populated on Record Pages, and this component
     // should not update when this component is on a record page.
-    if (this.subscription || this.recordId) {
+    if (this.subscription) {
       return;
     }
     // Subscribe to the message channel to retrieve the recordId and explicitly assign it to boatId.
     this.subscription = subscribe(
       this.messageContext,
       BOATMC,
-      (message) => { this.boatId = message.recordId },
+      (message) => this.handleMessage(message),
       { scope: APPLICATION_SCOPE }
     );
+  }
+
+  // Handler for message received by component
+  handleMessage(message) {
+    this.boatId = message.recordId;
   }
 
   //unsubscripte to the message channel

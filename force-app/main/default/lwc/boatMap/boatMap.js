@@ -46,7 +46,8 @@ export default class BoatMap extends LightningElement {
     // Wire the getRecord method using ('$boatId')
     @wire(getRecord, {
         recordId: "$boatId",
-        fields: BOAT_FIELDS})
+        fields: BOAT_FIELDS
+    })
     wiredRecord({ error, data }) {
         if (data) {
             this.error = undefined;
@@ -65,14 +66,17 @@ export default class BoatMap extends LightningElement {
     subscribeMC() {
         // recordId is populated on Record Pages, and this component
         // should not update when this component is on a record page.
-        if (this.subscription || this.recordId) {
+        if (this.subscription) {
             return;
         }
         // Subscribe to the message channel to retrieve the recordId and explicitly assign it to boatId.
         this.subscription = subscribe(
             this.messageContext,
             BOATMC,
-            (message) => { this.boatId = message.recordId },
+            (message) => {
+                this.boatId = message.recordId;
+                console.log('asdasdasd');
+            },
             { scope: APPLICATION_SCOPE }
         );
     }
@@ -94,7 +98,7 @@ export default class BoatMap extends LightningElement {
     }
 
     // Creates the map markers array with the current boat's location for the map.
-    updateMap(Longitude, Latitude) { 
+    updateMap(Longitude, Latitude) {
         this.mapMarkers = [{
             location: {
                 Latitude: Latitude,

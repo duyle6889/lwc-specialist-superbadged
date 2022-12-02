@@ -90,7 +90,7 @@ export default class BoatSearchResults extends LightningElement {
     sendMessageService(boatId) {
         // explicitly pass boatId to the parameter recordId
         const payload = { recordId: boatId };
-        publish(this.MessageContext, BOATMC, payload);
+        publish(this.messageContext, BOATMC, payload);
     }
 
     // The handleSave method must save the changes in the Boat Editor
